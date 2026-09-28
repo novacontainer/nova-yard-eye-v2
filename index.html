@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Yard Eye">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#5C2E0E">
+<title>NOVA Yard Eye</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap">
+<style>
+:root{--navy:#5C2E0E;--navy2:#7A3E14;--rust:#D9731E;--gold:#C9962B;--bg:#F7F1E7;--paper:#fff;--ink:#2B1D12;--muted:#7A6A5C;--line:#EADFCF;--good:#1D9E75;--good-soft:#E1F5EE;--warn:#B8760F;--warn-soft:#FBEFD6;--bad:#A32D2D;--bad-soft:#FCEBEB;--info:#B4560F;--info-soft:#FDEBDD;--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{font-family:'Sarabun',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:16px;line-height:1.45;overscroll-behavior:none}
+button{font-family:inherit;font-size:16px;border:0;border-radius:12px;padding:12px 16px;cursor:pointer;background:var(--paper);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+button.primary{background:var(--navy);color:#fff;font-weight:700}
+button.accent{background:var(--rust);color:#fff;font-weight:700}
+button.good{background:var(--good);color:#fff;font-weight:700}
+button.ghost{background:transparent;box-shadow:none;color:var(--muted)}
+button.danger{background:var(--bad-soft);color:var(--bad)}
+button:disabled{opacity:.45}
+button.big{padding:18px;font-size:19px;border-radius:16px;width:100%}
+button.xl{padding:22px;font-size:22px;border-radius:18px;width:100%}
+input,select,textarea{font-family:inherit;font-size:17px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;width:100%;background:#fff;color:var(--ink)}
+input.mono{font-family:ui-monospace,Menlo,monospace;letter-spacing:.08em;font-weight:700;text-transform:uppercase}
+.hdr{position:sticky;top:0;z-index:5;background:linear-gradient(90deg,var(--navy) 0%,var(--navy2) 60%,var(--rust) 100%);color:#fff;border-bottom:4px solid var(--gold);padding:calc(8px + var(--sat)) 12px 8px;display:flex;align-items:center;gap:10px}
+.hdr .lg{background:#fff;border-radius:8px;padding:3px 8px;display:flex;align-items:center;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.hdr .lg img{height:28px;display:block}
+.hdr .cap{font-size:10px;color:var(--gold);letter-spacing:1.5px;font-weight:600;white-space:nowrap}
+.hdr .t{font-weight:700;color:#fff;line-height:1.15;font-size:17px;white-space:nowrap}
+.hdr .ver{margin-left:6px;font-size:10px;font-weight:600;padding:1px 7px;border-radius:10px;background:#1a7f5a;color:#fff;vertical-align:middle}
+.hdr .sp{flex:1}
+.pill{display:inline-block;padding:4px 10px;border-radius:999px;font-size:13px;font-weight:700;background:var(--gold);color:var(--navy);white-space:nowrap}
+.pill.q{background:rgba(255,255,255,.18);color:#fff;cursor:pointer}
+.pill.q.bad{background:var(--bad);color:#fff}
+.pill.q.ok{background:var(--good);color:#fff}
+@media (max-width:600px){.hdr{gap:8px;padding-left:10px;padding-right:10px}.hdr .cap{font-size:9px;letter-spacing:1px}.hdr .t{font-size:15px}.hdr .lg{padding:2px 6px}.hdr .lg img{height:24px}.hdr .ver{display:none}}
+.wrap{padding:14px 14px calc(24px + var(--sab));max-width:640px;margin:0 auto}
+.admin .wrap{max-width:1100px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.card.warn{border-color:var(--warn);background:var(--warn-soft)}
+.card.bad{border-color:var(--bad);background:var(--bad-soft)}
+h2{font-size:18px;margin:0 0 8px;color:var(--navy)}
+.muted{color:var(--muted);font-size:14px}
+.row{display:flex;gap:10px;align-items:center}
+.row>*{flex:1}
+.list{display:flex;flex-direction:column;gap:6px}
+.li{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border:1px solid var(--line);border-radius:10px}
+.no{font-family:ui-monospace,Menlo,monospace;font-weight:700;letter-spacing:.05em}
+.li .no{font-size:17px}
+.tag{padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap}
+.tag.g{background:var(--good-soft);color:var(--good)}.tag.y{background:var(--warn-soft);color:var(--warn)}.tag.r{background:var(--bad-soft);color:var(--bad)}.tag.n{background:var(--info-soft);color:var(--info)}.tag.k{background:#eee;color:#555}
+.cam{position:relative;background:#000;border-radius:14px;overflow:hidden;aspect-ratio:3/4;max-height:64vh}
+.cam video{width:100%;height:100%;object-fit:cover;display:block}
+.cam .guide{position:absolute;left:5%;right:5%;top:40%;height:17%;border:3px dashed rgba(255,255,255,.85);border-radius:10px;pointer-events:none;box-shadow:0 0 0 2000px rgba(0,0,0,.28)}
+.cam .guide:after{content:'ให้เบอร์ตู้อยู่ในกรอบ';position:absolute;left:0;right:0;top:-28px;text-align:center;color:#fff;font-size:13px;text-shadow:0 1px 2px #000}
+.cam .lbl{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.55);color:#fff;padding:4px 10px;border-radius:999px;font-size:13px;max-width:70%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cam .cnt{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.55);color:#fff;padding:4px 10px;border-radius:999px;font-size:13px;font-weight:700}
+.cam .fileless{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#fff;gap:10px;padding:20px;text-align:center}
+.shutter{display:flex;justify-content:center;align-items:center;gap:20px;padding:12px 0}
+.shutter .btn{width:80px;height:80px;border-radius:50%;background:#fff;border:6px solid #cfd6dd;box-shadow:0 2px 8px rgba(0,0,0,.2);padding:0}
+.shutter .btn:active{transform:scale(.94)}
+.strip{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 8px}
+.th{position:relative;flex:0 0 auto;width:84px;height:84px;border-radius:10px;overflow:hidden;background:#ddd;border:2px solid transparent}
+.th img{width:100%;height:100%;object-fit:cover;display:block}
+.th .b{position:absolute;left:0;right:0;bottom:0;font-size:11px;padding:2px 4px;background:rgba(0,0,0,.6);color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
+.th .x{position:absolute;right:0;top:0;background:rgba(0,0,0,.55);color:#fff;font-size:14px;line-height:1;padding:4px 7px;border-radius:0 0 0 8px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + var(--sab));background:#1B2430;color:#fff;padding:10px 16px;border-radius:10px;z-index:50;font-size:15px;max-width:92vw;text-align:center}
+.big{font-size:34px;font-family:ui-monospace,Menlo,monospace;font-weight:700;letter-spacing:.1em;text-align:center;padding:8px 0;word-break:break-all}
+.big.s{font-size:26px}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:20px}
+.overlay img{max-height:38vh;max-width:90vw;border-radius:12px;margin-bottom:16px}
+.spin{width:36px;height:36px;border:4px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp 1s linear infinite;margin-bottom:12px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:40;display:flex;align-items:flex-end;justify-content:center}
+.modal .box{background:#fff;border-radius:16px 16px 0 0;padding:18px 16px calc(18px + var(--sab));width:100%;max-width:640px;max-height:88vh;overflow:auto}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
+.grid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;display:block;background:#eee}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tabs button{padding:8px 14px}
+.tabs button.on{background:var(--gold);color:var(--navy)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+label.f{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+.hint{font-size:13px;color:var(--muted);margin-top:4px}
+.kbd{display:grid;grid-template-columns:repeat(11,1fr);gap:3px;margin:6px 0}
+.kbd span{display:block;text-align:center;font-family:ui-monospace,Menlo,monospace;font-weight:700;font-size:20px;padding:8px 0;border:2px solid var(--line);border-radius:8px;background:#fff;min-height:44px}
+.kbd span.on{border-color:var(--navy)}
+.kbd span.ok{border-color:var(--good);background:var(--good-soft)}
+.kbd span.bad{border-color:var(--bad);background:var(--bad-soft)}
+.stat{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.stat div{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px}
+.stat b{display:block;font-size:24px;color:var(--navy)}
+.radio{display:flex;flex-direction:column;gap:8px}
+.radio label{display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid var(--line);border-radius:10px;cursor:pointer}
+.radio input{width:auto;margin-top:4px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div class="lg"><img id="logo" alt="NOVA"><b id="logoTxt" style="color:#5C2E0E;font-size:15px;letter-spacing:1px" hidden>NOVA</b></div>
+  <div><div class="cap">NOVA CONTAINER · <span id="branchCap">QC</span></div><div class="t">NOVA Yard Eye<span class="ver" id="verBadge">v2</span></div></div>
+  <div class="sp"></div>
+  <span class="pill q" id="qPill" hidden></span>
+  <span class="pill" id="namePill" hidden></span>
+</div>
+<div id="app" class="wrap"></div>
+<input type="file" id="fileIn" accept="image/*" capture="environment" hidden>
+<div id="toast" class="toast" hidden></div>
+<div id="overlay" class="overlay" hidden></div>
+
+<script>
+var LOGO_NOVA = ''; // โลโก้จริงโหลดจากหลังบ้าน (getBootstrap → logo) แล้วจำไว้ในเครื่อง
+
+(function(){ var l=LOGO_NOVA||ls('ye_logo')||''; var im=document.getElementById('logo'); if(l){ im.src=l; } else { im.hidden=true; document.getElementById('logoTxt').hidden=false; } })();
+function setLogo(dataUrl){ if(!dataUrl) return; try{ ls('ye_logo',dataUrl); }catch(e){} var im=document.getElementById('logo'); im.src=dataUrl; im.hidden=false; document.getElementById('logoTxt').hidden=true; }
+
+/* ================================================================== config ================================================================== */
+var API_URL = 'https://script.google.com/macros/s/AKfycbwEroBi0p3vnCZdr8kDeWd25GtsPRE0r4UeW4TsL97LxmN8sr6LQDe9fQjpgG9sKw5fHQ/exec';               // URL /exec ของ Apps Script (build script ใส่ให้)
+var APP_VER = '2.0.0';
+var TESS_CDN = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+document.getElementById('verBadge').textContent = 'v' + APP_VER;
+
+/* ================================================================== helpers ================================================================== */
+function $(id){ return document.getElementById(id); }
+function h(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+function ls(k,v){ try{ if(v===undefined) return localStorage.getItem(k); if(v===null) localStorage.removeItem(k); else localStorage.setItem(k,v);}catch(e){} return null; }
+function p2(n){ return (n<10?'0':'')+n; }
+function nowTxt(d){ d=d||new Date(); return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())+' '+p2(d.getHours())+':'+p2(d.getMinutes())+':'+p2(d.getSeconds()); }
+function stamp(d){ d=d||new Date(); return d.getFullYear()+p2(d.getMonth()+1)+p2(d.getDate())+'_'+p2(d.getHours())+p2(d.getMinutes())+p2(d.getSeconds()); }
+function todayIso(){ var d=new Date(); return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate()); }
+var toastT;
+function toast(msg,ms){ var t=$('toast'); t.textContent=msg; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(function(){t.hidden=true;},ms||2400); }
+function overlay(html){ var o=$('overlay'); if(!html){ o.hidden=true; o.innerHTML=''; return; } o.innerHTML=html; o.hidden=false; }
+function sleep(ms){ return new Promise(function(r){ setTimeout(r,ms); }); }
+function ask(msg){ return Promise.resolve(window.confirm(msg)); }
+function loadScript(src){ return new Promise(function(res,rej){ if(document.querySelector('script[src="'+src+'"]')) return res(); var s=document.createElement('script'); s.src=src; s.async=true; s.onload=res; s.onerror=function(){ rej(new Error('โหลดไม่ได้: '+src)); }; document.head.appendChild(s); }); }
+
+// เรียกหลังบ้าน: ผ่าน google.script.run ถ้าเปิดจาก Apps Script ไม่งั้นยิง HTTP ไปที่ API_URL (ลองซ้ำเองเมื่อเน็ตสะดุด)
+function gs(fn){
+  var args=Array.prototype.slice.call(arguments,1);
+  if(window.google && google.script && google.script.run){
+    return new Promise(function(res,rej){ var r=google.script.run.withSuccessHandler(res).withFailureHandler(function(e){ rej(e); }); r[fn].apply(r,args); });
+  }
+  var body=JSON.stringify({fn:fn,args:args,token:ls('ye_tok')||''});
+  var maxTry=(fn==='uploadPhoto'||fn==='finishContainer')?1:3;
+  function once(n){
+    return fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:body})
+      .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+      .then(function(j){ if(!j||!j.ok) throw new Error((j&&j.error)||'server error'); return j.result; })
+      .catch(function(e){ var m=String(e.message||e); if(/^AUTH:/.test(m)){ ls('ye_tok',null); }
+        var retry=/Failed to fetch|NetworkError|Load failed|HTTP 5\d\d|HTTP 404|HTTP 429|Unexpected token|JSON/.test(m);
+        if(retry && n<maxTry) return sleep(1500*n).then(function(){ return once(n+1); }); throw e; });
+  }
+  return once(1);
+}
+
+/* ---- ISO 6346 ---- */
+var LV={A:10,B:12,C:13,D:14,E:15,F:16,G:17,H:18,I:19,J:20,K:21,L:23,M:24,N:25,O:26,P:27,Q:28,R:29,S:30,T:31,U:32,V:34,W:35,X:36,Y:37,Z:38};
+function cleanNo(no){ return String(no||'').toUpperCase().replace(/[^A-Z0-9]/g,''); }
+function validNo(no){ no=cleanNo(no); if(!/^[A-Z]{4}\d{7}$/.test(no)) return false; var s=0; for(var i=0;i<10;i++){ var c=no.charAt(i); var v=i<4?LV[c]:parseInt(c,10); if(v===undefined) return false; s+=v*Math.pow(2,i);} var cd=s%11; if(cd===10) cd=0; return cd===parseInt(no.charAt(10),10); }
+// แก้ตัวที่สับสนตามตำแหน่ง แล้วคืนเบอร์ 11 ตัว
+var L2={'0':'O','1':'I','5':'S','8':'B','2':'Z','6':'G','4':'A','7':'T'}, D2={'O':'0','I':'1','L':'1','S':'5','B':'8','Z':'2','G':'6','Q':'0','D':'0','T':'7','A':'4'};
+function normNo(s){ s=cleanNo(s); if(s.length!==11) return s; var o=''; for(var i=0;i<11;i++){ var c=s.charAt(i); o+= i<4?(L2[c]||c):(D2[c]||c); } return o; }
+
+/* ================================================================== state ================================================================== */
+var S={
+  name: ls('ye_name')||'',
+  boot: null,                       // จากเซิร์ฟเวอร์: staff, reader, hasKey, wmPos, maxPx, jpegQ
+  screen: 'home',
+  session: null,                    // {sid,no,source,reader:{},photos:[],numberPhoto,folderId}
+  today: null,
+  cam: {stream:null, ok:false},
+  admin: false, adminTab: 'today', tok: ls('ye_tok')||''
+};
+var isAdminUrl = /[?#&]admin/.test(location.search+location.hash);
+if(isAdminUrl || (window.innerWidth>=900 && window.innerHeight>=600 && !ls('ye_forceMobile'))) S.admin=true;
+
+/* ================================================================== camera ================================================================== */
+async function startCam(videoEl){
+  if(S.cam.stream){ videoEl.srcObject=S.cam.stream; try{await videoEl.play();}catch(e){} return true; }
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){ S.cam.ok=false; return false; }
+  try{
+    var st=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1440}},audio:false});
+    S.cam.stream=st; S.cam.ok=true; videoEl.srcObject=st; await videoEl.play(); return true;
+  }catch(e){ S.cam.ok=false; return false; }
+}
+function stopCam(){ if(S.cam.stream){ S.cam.stream.getTracks().forEach(function(t){t.stop();}); S.cam.stream=null; } }
+function grabFrame(v){ var c=document.createElement('canvas'); c.width=v.videoWidth; c.height=v.videoHeight; c.getContext('2d').drawImage(v,0,0); return c; }
+async function fileToCanvas(file){
+  var bmp=null;
+  try{ if(window.createImageBitmap) bmp=await createImageBitmap(file,{imageOrientation:'from-image'}); }catch(e){ bmp=null; }
+  if(bmp){ var c=document.createElement('canvas'); c.width=bmp.width; c.height=bmp.height; c.getContext('2d').drawImage(bmp,0,0); bmp.close&&bmp.close(); return c; }
+  return new Promise(function(res,rej){ var url=URL.createObjectURL(file); var img=new Image(); img.onload=function(){ var c=document.createElement('canvas'); c.width=img.naturalWidth; c.height=img.naturalHeight; c.getContext('2d').drawImage(img,0,0); URL.revokeObjectURL(url); res(c); }; img.onerror=function(){ rej(new Error('อ่านรูปไม่ได้')); }; img.src=url; });
+}
+var pendingFileCb=null;
+function pickFile(){ return new Promise(function(res){ pendingFileCb=res; $('fileIn').value=''; $('fileIn').click(); }); }
+$('fileIn').addEventListener('change',function(){ var f=this.files&&this.files[0]; var cb=pendingFileCb; pendingFileCb=null; if(cb) cb(f||null); });
+// ถ่าย 1 เฟรม (กล้องสด หรือกล้องเครื่องเมื่อกล้องสดใช้ไม่ได้)
+async function captureCanvas(){
+  var v=$('vid');
+  if(S.cam.ok && v && v.videoWidth) return grabFrame(v);
+  var f=await pickFile(); if(!f) return null;
+  return fileToCanvas(f);
+}
+function canvasToBlob(c,q){ return new Promise(function(res){ c.toBlob(function(b){ res(b); },'image/jpeg',q); }); }
+// ย่อรูป + ลายน้ำ → {blob, thumb, w, h}
+async function processPhoto(src, wmLines){
+  var b=S.boot||{}; var maxPx=b.maxPx||1600, q=b.jpegQ||0.82, pos=b.wmPos||'bl';
+  var sc=Math.min(1, maxPx/Math.max(src.width,src.height));
+  var w=Math.round(src.width*sc), hh=Math.round(src.height*sc);
+  var c=document.createElement('canvas'); c.width=w; c.height=hh; var ctx=c.getContext('2d'); ctx.drawImage(src,0,0,w,hh);
+  var fs=Math.max(15,Math.round(w*0.026)); ctx.font='700 '+fs+'px Sarabun, Arial, sans-serif'; ctx.textBaseline='bottom';
+  var pad=Math.round(fs*0.6), lh=Math.round(fs*1.2);
+  var lines=(wmLines||[]).filter(Boolean);
+  for(var i=0;i<lines.length;i++){
+    var txt=lines[i]; var tw=ctx.measureText(txt).width;
+    var x=pos.indexOf('r')>=0 ? w-tw-pad : pad;
+    var y=pos.indexOf('t')>=0 ? fs+pad+i*lh : hh-pad-(lines.length-1-i)*lh;
+    ctx.lineWidth=Math.max(2,fs/6); ctx.strokeStyle='rgba(0,0,0,.85)'; ctx.strokeText(txt,x,y); ctx.fillStyle='#fff'; ctx.fillText(txt,x,y);
+  }
+  var blob=await canvasToBlob(c,q);
+  var t=document.createElement('canvas'); var ts=Math.min(1,240/Math.max(w,hh)); t.width=Math.round(w*ts); t.height=Math.round(hh*ts); t.getContext('2d').drawImage(c,0,0,t.width,t.height);
+  return {blob:blob, thumb:t.toDataURL('image/jpeg',0.6), w:w, h:hh};
+}
+function blobToB64(blob){ return new Promise(function(res,rej){ var r=new FileReader(); r.onload=function(){ res(String(r.result).split(',')[1]); }; r.onerror=rej; r.readAsDataURL(blob); }); }
+// ตัดเฉพาะบริเวณกรอบเล็ง (ตรงกับ .guide ใน CSS: left 5% right 5% top 40% height 17%) เผื่อขอบเล็กน้อย
+function cropGuide(src, boxAspect){
+  var vw=src.width, vh=src.height;
+  if(!boxAspect){ var sc0=Math.min(1,1600/Math.max(vw,vh)); var c0=document.createElement('canvas'); c0.width=Math.round(vw*sc0); c0.height=Math.round(vh*sc0); c0.getContext('2d').drawImage(src,0,0,c0.width,c0.height); return c0; }
+  // ส่วนที่มองเห็นจริงบนจอ (video ใช้ object-fit:cover) — boxAspect = กว้าง/สูง ของกล่องกล้อง
+  var ba=boxAspect||0.75; var visW=Math.min(vw, vh*ba), visH=Math.min(vh, vw/ba); var ox=(vw-visW)/2, oy=(vh-visH)/2;
+  var x=ox+visW*0.03, y=oy+visH*0.36, w=visW*0.94, hh=visH*0.25;
+  var scale=Math.min(1.6, 1400/w);
+  var c=document.createElement('canvas'); c.width=Math.round(w*scale); c.height=Math.round(hh*scale);
+  c.getContext('2d').drawImage(src,x,y,w,hh,0,0,c.width,c.height);
+  return c;
+}
+// ปรับภาพให้ OCR อ่านง่าย: ขาวดำ + ยืด contrast (+กลับสีเมื่อ invert=true)
+function enhance(src, invert){
+  var c=document.createElement('canvas'); c.width=src.width; c.height=src.height; var ctx=c.getContext('2d'); ctx.drawImage(src,0,0);
+  var im=ctx.getImageData(0,0,c.width,c.height), d=im.data, n=d.length, hist=new Uint32Array(256), i, g;
+  var gray=new Uint8ClampedArray(n/4);
+  for(i=0;i<n;i+=4){ g=(d[i]*299+d[i+1]*587+d[i+2]*114)/1000|0; gray[i>>2]=g; hist[g]++; }
+  var total=n/4, lo=0, hi=255, acc=0; var cut=total*0.01;
+  for(i=0;i<256;i++){ acc+=hist[i]; if(acc>cut){ lo=i; break; } } acc=0;
+  for(i=255;i>=0;i--){ acc+=hist[i]; if(acc>cut){ hi=i; break; } }
+  var rng=Math.max(1,hi-lo);
+  for(i=0;i<n;i+=4){ g=((gray[i>>2]-lo)*255/rng); g=g<0?0:g>255?255:g; if(invert) g=255-g; d[i]=d[i+1]=d[i+2]=g; }
+  ctx.putImageData(im,0,0);
+  return c;
+}
+
+/* ================================================================== local OCR (Tesseract.js) ================================================================== */
+var OCR={worker:null, loading:null, ready:false, err:''};
+function ocrInit(){
+  if(OCR.loading) return OCR.loading;
+  OCR.loading=(async function(){
+    try{
+      await loadScript(window.TESS_SRC||TESS_CDN);
+      var w=await Tesseract.createWorker('eng',1,window.TESS_OPTS||{});
+      await w.setParameters({tessedit_char_whitelist:'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ',tessedit_pageseg_mode:'6',preserve_interword_spaces:'1'});
+      OCR.worker=w; OCR.ready=true;
+    }catch(e){ OCR.err=String(e.message||e); OCR.ready=false; }
+  })();
+  return OCR.loading;
+}
+// หาเบอร์ตู้ที่ check digit ผ่านจากข้อความ OCR; คืน {no,valid,raw} (valid=false = เจอรูปแบบคล้ายเบอร์แต่ไม่ผ่าน)
+function extractNo(text){
+  var lines=String(text||'').toUpperCase().split(/\n+/).map(function(l){ return l.replace(/[^A-Z0-9]/g,''); }).filter(Boolean);
+  var cands=lines.slice(); cands.push(lines.join(''));
+  for(var k=0;k<lines.length-1;k++) cands.push(lines[k]+lines[k+1]);
+  var near=null;
+  for(var c=0;c<cands.length;c++){
+    var s=cands[c];
+    for(var i=0;i+11<=s.length;i++){
+      var w=normNo(s.substr(i,11));
+      if(!/^[A-Z]{4}\d{7}$/.test(w)) continue;
+      if(validNo(w)) return {no:w,valid:true,raw:s.substr(i,11)};
+      if(!near && /U$/.test(w.substr(0,4))) near={no:w,valid:false,raw:s.substr(i,11)};
+    }
+  }
+  return near;
+}
+// หา "10 ตัวแรก" (4 ตัวอักษร + 6 ตัวเลข) จากคำที่ OCR อ่านได้ พร้อมกรอบของคำตัวเลข — ใช้เมื่อหลักตรวจสอบในกรอบสี่เหลี่ยมถูก OCR ทิ้งไป
+function findPrefix(words){
+  words=(words||[]).filter(function(w){ return /[A-Z0-9]/i.test(w.text||''); });
+  for(var i=0;i<words.length;i++){
+    var a=cleanNo(words[i].text);
+    // แบบคำเดียว "DRYU309678" หรือ "DRYU3096781"
+    var m=a.match(/^([A-Z0-9]{4})(\d{6})/); if(m && a.length<=11){ var p=normNo(m[1]+m[2]+'0').substr(0,10); if(/^[A-Z]{4}\d{6}$/.test(p)) return {prefix:p,bbox:words[i].bbox}; }
+    // แบบสองคำ "DRYU" + "309678"
+    if(i+1<words.length){ var b=cleanNo(words[i+1].text); if(a.length===4 && /^\d{6}$/.test(normNo(a+b+'0').substr(4,6))){ var p2=normNo(a+b+'0').substr(0,10); if(/^[A-Z]{4}\d{6}$/.test(p2)) return {prefix:p2,bbox:words[i+1].bbox}; } }
+  }
+  return null;
+}
+// ลบชิ้นส่วนที่ใหญ่ผิดขนาดตัวอักษร (เส้นกรอบสี่เหลี่ยมของหลักตรวจสอบ) ออกจากรูปเล็ก ๆ ก่อนอ่านตัวเลขเดี่ยว
+function stripBox(cv, charH){
+  var ctx=cv.getContext('2d'); var W=cv.width,H=cv.height; var im=ctx.getImageData(0,0,W,H), d=im.data;
+  var bin=new Uint8Array(W*H), dark=0, i;
+  for(i=0;i<W*H;i++){ bin[i]=d[i*4]<128?1:0; dark+=bin[i]; }
+  var fg=dark<W*H/2?1:0, bgv=fg?255:0;
+  var lab=new Int32Array(W*H); var stack=[]; var comps=[]; var id=0;
+  for(var s=0;s<W*H;s++){
+    if(bin[s]!==fg||lab[s]) continue; id++; var minx=W,maxx=0,miny=H,maxy=0,px=[]; stack.push(s); lab[s]=id;
+    while(stack.length){ var q=stack.pop(); px.push(q); var x=q%W,y=(q-x)/W; if(x<minx)minx=x; if(x>maxx)maxx=x; if(y<miny)miny=y; if(y>maxy)maxy=y;
+      var nb=[q-1,q+1,q-W,q+W]; for(var k=0;k<4;k++){ var t=nb[k]; if(t<0||t>=W*H) continue; if(k<2 && ((t%W)-x)*((t%W)-x)>1) continue; if(bin[t]===fg&&!lab[t]){ lab[t]=id; stack.push(t); } } }
+    comps.push({px:px,w:maxx-minx+1,h:maxy-miny+1,minx:minx,maxx:maxx,miny:miny,maxy:maxy});
+  }
+  comps.forEach(function(c){
+    var big=c.h>charH*1.35||c.w>charH*1.25; var edge=(c.minx<=1&&c.maxx>=W-2)||(c.miny<=1&&c.maxy>=H-2); var tiny=c.px.length<charH*0.6;
+    if(big||edge||tiny) c.px.forEach(function(p){ var j=p*4; d[j]=d[j+1]=d[j+2]=bgv; });
+  });
+  ctx.putImageData(im,0,0); return cv;
+}
+// อ่านหลักตรวจสอบจากบริเวณขวาของคำตัวเลข 6 หลัก
+async function readCheckDigit(img, bbox){
+  var hh=bbox.y1-bbox.y0; if(hh<8) return null;
+  var x0=Math.max(0,Math.round(bbox.x1+hh*0.05)), x1=Math.min(img.width,Math.round(bbox.x1+hh*2.6));
+  var y0=Math.max(0,Math.round(bbox.y0-hh*0.55)), y1=Math.min(img.height,Math.round(bbox.y1+hh*0.55));
+  if(x1-x0<hh*0.6) return null;
+  var sc=Math.max(1,Math.min(3,120/hh)); var c=document.createElement('canvas'); c.width=Math.round((x1-x0)*sc); c.height=Math.round((y1-y0)*sc);
+  c.getContext('2d').drawImage(img,x0,y0,x1-x0,y1-y0,0,0,c.width,c.height);
+  stripBox(c, hh*sc);
+  var pad=document.createElement('canvas'); var m=Math.round(hh*sc*0.4); pad.width=c.width+m*2; pad.height=c.height+m*2; var pc=pad.getContext('2d');
+  var bg=c.getContext('2d').getImageData(0,0,1,1).data[0]<128?'#000':'#fff'; pc.fillStyle=bg; pc.fillRect(0,0,pad.width,pad.height); pc.drawImage(c,m,m);
+  var out=null;
+  try{
+    await OCR.worker.setParameters({tessedit_char_whitelist:'0123456789',tessedit_pageseg_mode:'7'});
+    var r=await OCR.worker.recognize(pad); var t=(r.data.text||'').replace(/\D/g,'');
+    if(t.length!==1){ await OCR.worker.setParameters({tessedit_pageseg_mode:'10'}); r=await OCR.worker.recognize(pad); t=(r.data.text||'').replace(/\D/g,''); }
+    if(t.length>=1) out=t.charAt(0);
+  }finally{ await OCR.worker.setParameters({tessedit_char_whitelist:'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ',tessedit_pageseg_mode:'6'}); }
+  return out;
+}
+async function ocrLocal(frame, onStep, boxAspect){
+  if(!OCR.ready){ onStep&&onStep('กำลังเตรียมตัวอ่านเบอร์…'); await ocrInit(); }
+  if(!OCR.ready) throw new Error('OCR บนเครื่องใช้ไม่ได้: '+OCR.err);
+  var crop=cropGuide(frame, boxAspect);
+  var enh=enhance(crop,false), inv=enhance(crop,true);
+  var variants=[{img:enh,psm:'6'},{img:enh,psm:'7'},{img:inv,psm:'6'}];
+  var near=null, t0=Date.now(), texts=[], prefixHit=null;
+  for(var i=0;i<variants.length;i++){
+    onStep&&onStep('OCR บนเครื่อง ('+(i+1)+'/'+variants.length+')…');
+    await OCR.worker.setParameters({tessedit_pageseg_mode:variants[i].psm});
+    var r=await OCR.worker.recognize(variants[i].img);
+    var text=(r&&r.data&&r.data.text)||''; texts.push(text);
+    var got=extractNo(text);
+    if(got&&got.valid) return {ok:true,no:got.no,raw:got.raw,engine:'ocr',ms:Date.now()-t0,pass:i+1};
+    if(got&&!near) near=got;
+    if(!prefixHit){ var pf=findPrefix(r&&r.data&&r.data.words); if(pf) prefixHit={prefix:pf.prefix,bbox:pf.bbox,img:variants[i].img}; }
+    if(Date.now()-t0>9000) break;
+  }
+  // หลักตรวจสอบมักอยู่ในกรอบสี่เหลี่ยมและถูก OCR ทิ้ง → อ่านซ้ำเฉพาะจุดนั้น
+  if(prefixHit){
+    onStep&&onStep('OCR อ่านหลักตรวจสอบ…');
+    try{ var cd=await readCheckDigit(prefixHit.img, prefixHit.bbox); if(cd!=null){ var full=prefixHit.prefix+cd; if(validNo(full)) return {ok:true,no:full,raw:full,engine:'ocr',ms:Date.now()-t0,pass:'cd'}; if(!near) near={no:full,valid:false,raw:full}; } }catch(e){}
+  }
+  return {ok:false,near:near,engine:'ocr',ms:Date.now()-t0,texts:texts};
+}
+// ตัวอ่านแบบผสม: OCR บนเครื่อง → (ไม่ผ่าน) Gemini → คืนผลพร้อมสถิติ
+async function readContainerNo(frame, stat, onStep, boxAspect){
+  var mode=(S.boot&&S.boot.reader)||'hybrid', hasKey=!!(S.boot&&S.boot.hasKey);
+  var res={no:'',valid:false,engine:'',near:'',errors:[]};
+  if(mode!=='gemini'){
+    stat.localTried=(stat.localTried||0)+1;
+    try{ var l=await ocrLocal(frame,onStep,boxAspect); stat.localMs=(stat.localMs||0)+(l.ms||0);
+      if(l.ok){ stat.localOk=(stat.localOk||0)+1; res.no=l.no; res.valid=true; res.engine='ocr'; return res; }
+      if(l.near) res.near=l.near.no;
+    }catch(e){ res.errors.push(String(e.message||e)); }
+  }
+  if(mode!=='local'){
+    if(!hasKey){ res.errors.push('ยังไม่ได้ตั้ง Gemini key'); return res; }
+    stat.aiTried=(stat.aiTried||0)+1;
+    onStep&&onStep('OCR อ่านไม่ผ่าน กำลังให้ AI อ่าน…');
+    try{
+      var sc=Math.min(1,1280/Math.max(frame.width,frame.height)); var c=document.createElement('canvas'); c.width=Math.round(frame.width*sc); c.height=Math.round(frame.height*sc); c.getContext('2d').drawImage(frame,0,0,c.width,c.height);
+      var b64=c.toDataURL('image/jpeg',0.8).split(',')[1];
+      var r=await gs('readNumber',b64);
+      if(r&&r.ok&&r.best){ if(r.best.valid){ stat.aiOk=(stat.aiOk||0)+1; res.no=r.best.no; res.valid=true; res.engine='ai'; return res; } res.near=res.near||r.best.no; }
+      else if(r&&!r.ok) res.errors.push(r.error||'AI อ่านไม่ได้');
+    }catch(e){ res.errors.push(String(e.message||e)); }
+  }
+  return res;
+}
+
+/* ================================================================== upload queue (IndexedDB) ================================================================== */
+var DB={db:null};
+function idb(){ return new Promise(function(res,rej){ if(DB.db) return res(DB.db); var r=indexedDB.open('yardeye2',1); r.onupgradeneeded=function(){ var d=r.result; if(!d.objectStoreNames.contains('jobs')) d.createObjectStore('jobs',{keyPath:'id'}); }; r.onsuccess=function(){ DB.db=r.result; res(DB.db); }; r.onerror=function(){ rej(r.error); }; }); }
+function tx(fn){ return idb().then(function(d){ return new Promise(function(res,rej){ var t=d.transaction('jobs','readwrite'); fn(t.objectStore('jobs')); t.oncomplete=function(){ res(); }; t.onerror=function(){ rej(t.error); }; }); }); }
+function jobPut(j){ return tx(function(st){ st.put(j); }); }
+function jobDel(id){ return tx(function(st){ st.delete(id); }); }
+function jobAll(){ return idb().then(function(d){ return new Promise(function(res,rej){ var r=d.transaction('jobs','readonly').objectStore('jobs').getAll(); r.onsuccess=function(){ res(r.result||[]); }; r.onerror=function(){ rej(r.error); }; }); }); }
+var MAXTRY=8;
+var Q={max:2,busy:false,lastErr:'',stats:{pending:0,err:0},timer:null};
+function failJob(j,e){ j.tries++; j.err=String(e.message||e); j.nextAt=Date.now()+Math.min(60000,2000*Math.pow(2,j.tries)); Q.lastErr=j.err; return jobPut(j); }
+function canRun(j){ return !j.done && j.tries<MAXTRY && (!j.nextAt || j.nextAt<=Date.now()); }
+async function enqueueSession(ss){
+  var order=0;
+  for(var i=0;i<ss.photos.length;i++){ var p=ss.photos[i]; await jobPut({id:ss.sid+'_p'+(++order),type:'photo',sid:ss.sid,no:ss.no,folderId:ss.folderId||'',name:p.name,blob:p.blob,seq:order,tries:0,created:Date.now(),meta:{no:ss.no,by:S.name,kind:p.kind||'photo'}}); }
+  await jobPut({id:ss.sid+'_z',type:'finish',sid:ss.sid,no:ss.no,folderId:ss.folderId||'',by:S.name,source:ss.source,reader:ss.reader,count:ss.photos.length,tries:0,created:Date.now()});
+  pump();
+}
+async function pump(){
+  if(Q.busy) return; Q.busy=true; clearTimeout(Q.timer);
+  try{
+    var jobs=await jobAll();
+    jobs.sort(function(a,b){ return a.created-b.created || String(a.id).localeCompare(String(b.id)); });
+    var photos=jobs.filter(function(j){ return j.type==='photo'; });
+    var finishes=jobs.filter(function(j){ return j.type==='finish'; });
+    Q.stats.pending=jobs.length; Q.stats.err=jobs.filter(function(j){ return j.tries>=MAXTRY; }).length; renderQ();
+    if(navigator.onLine){
+      // 1) อัปโหลดรูปพร้อมกันไม่เกิน Q.max
+      var active=photos.filter(canRun).slice(0,Q.max);
+      await Promise.all(active.map(uploadJob));
+      // 2) ปิดตู้ที่รูปครบแล้ว
+      for(var i=0;i<finishes.length;i++){
+        var f=finishes[i];
+        var mine=photos.filter(function(j){ return j.sid===f.sid; });
+        if(mine.some(function(j){ return !j.done; })) continue;   // รอรูปให้ครบก่อน (ถ้าค้างถาวร รอคนกด "ลองส่งใหม่")
+        if(!canRun(f)) continue;
+        try{
+          if(!f.folderId){ f.folderId=await ensureFolder(f); }
+          var r=await gs('finishContainer',{sid:f.sid,no:f.no,folderId:f.folderId,by:f.by,source:f.source,reader:f.reader,fileIds:mine.map(function(j){ return j.fileId; }).filter(Boolean)});
+          for(var k=0;k<mine.length;k++) await jobDel(mine[k].id);
+          await jobDel(f.id);
+          Q.lastErr='';
+          toast('บันทึกตู้ '+f.no+' แล้ว ('+((r.entry&&r.entry.photos)||f.count)+' รูป)'+(r.merged?' · รวมกับรอบก่อนหน้าวันนี้':''),2600);
+          refreshToday();
+        }catch(e){ await failJob(f,e); }
+      }
+    }
+    var left=await jobAll(); Q.stats.pending=left.length; Q.stats.err=left.filter(function(j){ return j.tries>=MAXTRY; }).length; renderQ();
+    // นัดรอบถัดไปเมื่อยังมีงานที่ทำต่อได้
+    var waits=left.filter(function(j){ return !j.done && j.tries<MAXTRY; }).map(function(j){ return Math.max(300,(j.nextAt||0)-Date.now()); });
+    if(waits.length) Q.timer=setTimeout(pump, Math.min.apply(null,waits));
+  }catch(e){ Q.lastErr=String(e.message||e); }
+  finally{ Q.busy=false; renderQ(); }
+}
+var folderCache={};
+async function ensureFolder(job){
+  if(folderCache[job.sid]) return folderCache[job.sid];
+  var r=await gs('beginContainer',{no:job.no});
+  folderCache[job.sid]=r.folderId;
+  var all=await jobAll(); for(var i=0;i<all.length;i++){ if(all[i].sid===job.sid && !all[i].folderId){ all[i].folderId=r.folderId; await jobPut(all[i]); } }
+  return r.folderId;
+}
+async function uploadJob(j){
+  try{
+    if(!j.folderId) j.folderId=await ensureFolder(j);
+    var b64=await blobToB64(j.blob);
+    var r=await gs('uploadPhoto',{folderId:j.folderId,b64:b64,name:j.name,meta:j.meta});
+    j.done=true; j.fileId=r.id; j.blob=null; await jobPut(j); Q.lastErr='';
+  }catch(e){ await failJob(j,e); }
+}
+function renderQ(){
+  var el=$('qPill'); if(!el) return;
+  var n=Q.stats.pending;
+  if(!n){ el.hidden=true; return; }
+  el.hidden=false; el.className='pill q'+(Q.stats.err?' bad':(navigator.onLine?'':' bad'));
+  el.textContent=(Q.stats.err?'⚠ ':'⬆ ')+n;
+}
+$('qPill').onclick=showQueue;
+async function showQueue(){
+  var jobs=await jobAll();
+  var m=document.createElement('div'); m.className='modal';
+  var bySid={}; jobs.forEach(function(j){ bySid[j.sid]=bySid[j.sid]||{no:j.no,photos:0,done:0,err:'',stuck:false,finish:false}; var b=bySid[j.sid]; if(j.type==='photo'){ b.photos++; if(j.done) b.done++; } else b.finish=true; if(j.err) b.err=j.err; if(j.tries>=MAXTRY) b.stuck=true; });
+  var keys=Object.keys(bySid);
+  m.innerHTML='<div class="box"><h2>คิวส่งข้อมูล ('+jobs.length+')</h2>'+(navigator.onLine?'':'<div class="card bad">ออฟไลน์ — จะส่งต่อเองเมื่อมีสัญญาณ</div>')+
+    (keys.length?'<div class="list">'+keys.map(function(k){ var b=bySid[k]; return '<div class="li" style="flex-wrap:wrap"><span class="no">'+h(b.no)+'</span><span class="muted" style="flex:1">รูป '+b.done+'/'+b.photos+(b.finish?' · รอปิดตู้':'')+'</span>'+(b.stuck?'<span class="tag r">ค้าง</span>':'<span class="tag y">กำลังส่ง</span>')+(b.err?'<div class="muted" style="width:100%;color:var(--bad)">'+h(b.err)+'</div>':'')+'</div>'; }).join('')+'</div>':'<div class="muted">ไม่มีงานค้าง</div>')+
+    '<div style="height:12px"></div><div class="row"><button id="qRetry" class="primary">ลองส่งใหม่</button><button id="qClose">ปิด</button></div>'+(Q.stats.err?'<div style="height:8px"></div><button id="qDrop" class="danger" style="width:100%">ทิ้งงานที่ค้าง (รูปจะหาย)</button>':'')+'</div>';
+  document.body.appendChild(m);
+  $('qClose').onclick=function(){ m.remove(); };
+  $('qRetry').onclick=async function(){ var all=await jobAll(); for(var i=0;i<all.length;i++){ if(all[i].tries>=MAXTRY||all[i].nextAt){ all[i].tries=0; all[i].nextAt=0; await jobPut(all[i]); } } m.remove(); pump(); };
+  if($('qDrop')) $('qDrop').onclick=async function(){ if(!await ask('ทิ้งงานที่ค้างทั้งหมด? รูปที่ยังส่งไม่ขึ้นจะหายไป')) return; var all=await jobAll(); for(var i=0;i<all.length;i++){ if(all[i].tries>=MAXTRY){ var sid=all[i].sid; for(var k=0;k<all.length;k++) if(all[k].sid===sid) await jobDel(all[k].id); } } m.remove(); pump(); };
+}
+window.addEventListener('online',function(){ toast('กลับมาออนไลน์ — ส่งต่อ'); pump(); });
+setInterval(function(){ if(navigator.onLine) pump(); },20000);
+
+/* ================================================================== boot ================================================================== */
+async function boot(){
+  render();
+  try{ S.boot=await gs('getBootstrap'); ls('ye_boot',JSON.stringify(S.boot)); }
+  catch(e){ try{ S.boot=JSON.parse(ls('ye_boot')||'null'); }catch(e2){} if(!S.boot) S.boot={staff:[],reader:'hybrid',hasKey:false,wmPos:'bl',maxPx:1600,jpegQ:0.82,branch:'NOVA',offline:true}; else S.boot.offline=true; toast('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ — ใช้ค่าล่าสุดที่จำไว้',3500); }
+  $('branchCap').textContent=(S.boot.branch||'NOVA')+' · QC';
+  if(S.boot.logo) setLogo(S.boot.logo);
+  render(); refreshToday(); pump();
+  if(!S.admin && (S.boot.reader||'hybrid')!=='gemini') ocrInit();
+}
+async function refreshToday(){ try{ S.today=await gs('getToday'); if(S.screen==='home' && !S.admin) render(); }catch(e){} }
+
+/* ================================================================== render ================================================================== */
+function render(){
+  var np=$('namePill'); np.hidden=!S.name; np.textContent=S.name;
+  document.body.classList.toggle('admin', S.admin);
+  var app=$('app');
+  if(S.admin) return renderAdmin(app);
+  if(S.session) return renderSession(app);
+  return renderHome(app);
+}
+function renderHome(app){
+  var b=S.boot||{}; var staff=b.staff||[]; var t=S.today;
+  var mine=t?t.entries.filter(function(e){ return (e.by||'').split(',').indexOf(S.name)>=0; }):[];
+  var html='';
+  if(b.offline) html+='<div class="card bad"><b>เชื่อมต่อเซิร์ฟเวอร์ไม่ได้</b><div class="muted">ถ่ายต่อได้ รูปจะเข้าคิวและส่งเองเมื่อมีสัญญาณ (การอ่านเบอร์ด้วย AI ใช้ไม่ได้ชั่วคราว)</div></div>';
+  html+='<div class="card"><h2>เริ่มทำงาน</h2>'+
+    '<label class="f">ชื่อคนถ่าย (พิมพ์เป็นลายน้ำบนทุกรูป)</label>'+
+    (staff.length? '<select id="nameSel"><option value="">— เลือกชื่อ —</option>'+staff.map(function(n){ return '<option'+(n===S.name?' selected':'')+'>'+h(n)+'</option>'; }).join('')+'</select>'
+                 : '<input id="nameIn" maxlength="8" placeholder="เช่น สมชาย (ไม่เกิน 8 ตัว)" value="'+h(S.name)+'"><div class="hint">ผู้ดูแลยังไม่ได้ใส่รายชื่อพนักงาน — พิมพ์ชื่อเองไปก่อน</div>')+
+    '<div style="height:14px"></div><button class="accent xl" id="start">📷 เริ่มทำงาน — ถ่ายเบอร์ตู้</button></div>';
+  html+='<div class="card"><h2>วันนี้ · '+h(t?t.date:todayIso())+'</h2>'+(t?'<div class="muted">ทั้งลาน '+t.count+' ตู้ · '+t.photos+' รูป'+(S.name?' · ของ '+h(S.name)+' '+mine.length+' ตู้':'')+'</div>':'<div class="muted">กำลังโหลด…</div>')+
+    (t&&t.entries.length?'<div class="list" style="margin-top:8px">'+t.entries.slice().reverse().slice(0,30).map(function(e){ return '<div class="li"><span class="no">'+h(e.no)+'</span><span class="muted" style="flex:1">'+e.photos+' รูป · '+h((e.lastTime||e.time||'').substring(11,16))+'</span>'+(e.manual?'<span class="tag y">คีย์เอง</span>':e.ai?'<span class="tag n">AI</span>':'')+'<span class="tag k">'+h(e.by)+'</span></div>'; }).join('')+'</div>':'')+'</div>';
+  html+='<div class="muted" style="text-align:center">ตัวอ่านเบอร์: '+({hybrid:'OCR บนเครื่อง → AI เมื่ออ่านไม่ผ่าน',local:'OCR บนเครื่องอย่างเดียว',gemini:'AI (Gemini) อย่างเดียว'}[b.reader]||'ผสม')+(OCR.ready?' · พร้อม':'')+'</div>'+
+    '<div style="text-align:center;margin-top:10px"><button class="ghost" id="toAdmin">หน้าผู้ดูแล</button></div>';
+  app.innerHTML=html;
+  $('start').onclick=function(){ var n=($('nameSel')?$('nameSel').value:$('nameIn').value).trim().substring(0,8); if(!n){ toast('เลือกชื่อคนถ่ายก่อน'); return; } S.name=n; ls('ye_name',n); startSession(); };
+  $('toAdmin').onclick=function(){ S.admin=true; render(); };
+}
+
+/* ================================================================== QC session ================================================================== */
+function startSession(){
+  S.session={sid:'s'+stamp()+'_'+Math.floor(Math.random()*9000+1000), step:'num', no:'', source:'', reader:{retakes:0}, photos:[], numberPhoto:null, folderId:'', k:0};
+  render();
+}
+function renderSession(app){
+  var ss=S.session;
+  if(ss.step==='num') return screenNumberCam(app,ss);
+  if(ss.step==='confirmNo') return screenConfirmNo(app,ss);
+  if(ss.step==='manual') return screenManual(app,ss);
+  if(ss.step==='collect') return screenCollect(app,ss);
+  if(ss.step==='send') return screenSend(app,ss);
+}
+function camBlock(label, guide){
+  return '<div class="cam"><video id="vid" playsinline muted autoplay></video><div id="noCam" class="fileless" hidden><div style="font-size:40px">📷</div><div>กล้องในหน้าแอปเปิดไม่ได้บนเครื่องนี้<br>กดปุ่มถ่ายเพื่อใช้กล้องของเครื่องแทน</div></div>'+
+    (guide?'<div class="guide"></div>':'')+'<div class="lbl">'+h(label)+'</div><div class="cnt" id="cnt"></div></div>'+
+    '<div class="shutter"><button class="btn" id="shot" aria-label="ถ่าย"></button></div>';
+}
+async function mountCam(onShot, cntTxt){
+  var v=$('vid'); if(!v) return;
+  var ok=await startCam(v);
+  if(!ok){ v.hidden=true; $('noCam').hidden=false; }
+  $('shot').onclick=onShot; if($('cnt')) $('cnt').textContent=cntTxt||'';
+}
+// 1) ถ่ายเบอร์ตู้
+function screenNumberCam(app,ss){
+  app.innerHTML='<div class="card" style="padding:10px"><b>ถ่ายเบอร์ตู้</b> <span class="muted">หน้าตู้หรือบนหลังคาก็ได้ ให้เบอร์อยู่ในกรอบ ชัด ไม่ย้อนแสง</span></div>'+
+    camBlock('เบอร์ตู้',true)+
+    '<div class="row"><button class="danger" id="cancel">ยกเลิก</button><button id="manual">คีย์เบอร์เอง</button></div>';
+  mountCam(shootNumber, ss.reader.retakes?('ถ่ายใหม่ครั้งที่ '+ss.reader.retakes):'');
+  $('cancel').onclick=cancelSession;
+  $('manual').onclick=function(){ ss.manualFrom='cam'; ss.step='manual'; stopCam(); render(); };
+}
+async function shootNumber(){
+  var ss=S.session; if(!ss) return;
+  var vEl=$('vid'); var boxAspect=(S.cam.ok&&vEl&&vEl.clientHeight)?(vEl.clientWidth/vEl.clientHeight):0; // 0 = รูปจากกล้องเครื่อง ไม่มีกรอบ → ใช้ทั้งรูป
+  var frame; try{ frame=await captureCanvas(); }catch(e){ toast('ถ่ายไม่สำเร็จ: '+(e.message||e)); return; }
+  if(!frame) return;
+  var thumbC=document.createElement('canvas'); var ts=Math.min(1,480/Math.max(frame.width,frame.height)); thumbC.width=Math.round(frame.width*ts); thumbC.height=Math.round(frame.height*ts); thumbC.getContext('2d').drawImage(frame,0,0,thumbC.width,thumbC.height);
+  var thumb=thumbC.toDataURL('image/jpeg',0.7);
+  overlay('<img src="'+thumb+'"><div class="spin"></div><div id="ovMsg">กำลังอ่านเบอร์ตู้…</div>');
+  var t0=Date.now();
+  var res=await readContainerNo(frame, ss.reader, function(m){ var el=$('ovMsg'); if(el) el.textContent=m; }, boxAspect);
+  overlay(null);
+  ss.numFrame=frame; ss.numThumb=thumb;
+  ss.read={no:res.no,valid:res.valid,engine:res.engine,near:res.near,errors:res.errors,ms:Date.now()-t0};
+  ss.step='confirmNo'; render();
+}
+// 2) ยืนยันเบอร์
+function screenConfirmNo(app,ss){
+  var r=ss.read||{}; var ok=!!(r.no&&r.valid);
+  var engineTag=r.engine==='ocr'?'<span class="tag g">OCR บนเครื่อง</span>':r.engine==='ai'?'<span class="tag n">AI อ่านให้</span>':'';
+  var html='<div class="card">'+(ss.numThumb?'<img src="'+ss.numThumb+'" style="max-height:170px;max-width:100%;border-radius:10px;display:block;margin:0 auto 8px">':'');
+  if(ok){
+    html+='<div class="muted" style="text-align:center">อ่านได้ '+engineTag+' <span class="tag g">check digit ผ่าน</span></div><div class="big">'+h(r.no)+'</div>'+
+      '<div class="muted" style="text-align:center;margin-bottom:10px">เบอร์นี้ถูกต้องไหม?</div>'+
+      '<button class="good xl" id="okNo">✓ ถูกต้อง — ถ่ายรูปงานต่อ</button><div style="height:10px"></div>'+
+      '<div class="row"><button id="manual">✎ แก้ไข / คีย์เอง</button><button id="retake">📷 ถ่ายใหม่</button></div>';
+  } else {
+    html+='<div class="big s" style="color:var(--bad)">อ่านเบอร์ไม่ได้</div>'+
+      (r.near?'<div class="muted" style="text-align:center">อ่านได้คล้าย <span class="no">'+h(r.near)+'</span> แต่ check digit ไม่ผ่าน</div>':'')+
+      (r.errors&&r.errors.length?'<div class="muted" style="text-align:center;font-size:12px">'+h(r.errors.join(' · '))+'</div>':'')+
+      '<div class="muted" style="text-align:center;margin:8px 0">ลองถ่ายใหม่ให้เบอร์ชัดและอยู่ในกรอบ หรือคีย์เอง</div>'+
+      '<button class="accent xl" id="retake">📷 ถ่ายใหม่</button><div style="height:10px"></div><button class="big" id="manual">✎ คีย์เบอร์เอง</button>';
+  }
+  html+='<div style="height:10px"></div><button class="danger" id="cancel" style="width:100%">ยกเลิกตู้นี้</button></div>';
+  app.innerHTML=html;
+  if($('okNo')) $('okNo').onclick=function(){ acceptNumber(r.no, r.engine); };
+  $('retake').onclick=function(){ ss.reader.retakes++; ss.step='num'; render(); };
+  $('manual').onclick=function(){ ss.manualPrefill=ok?r.no:(r.near||''); ss.step='manual'; render(); };
+  $('cancel').onclick=cancelSession;
+}
+// 3) คีย์เอง (ต้องผ่าน check digit เท่านั้น)
+function screenManual(app,ss){
+  var pre=cleanNo(ss.manualPrefill||'');
+  app.innerHTML='<div class="card"><h2>คีย์เบอร์ตู้เอง</h2><div class="muted">4 ตัวอักษร + 7 ตัวเลข — ระบบตรวจ check digit ให้ทันที ยืนยันได้เมื่อผ่านเท่านั้น</div>'+
+    '<div class="kbd" id="boxes"></div>'+
+    '<input id="noIn" class="mono" maxlength="11" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="เช่น MSKU1234567" value="'+h(pre)+'" style="font-size:22px;text-align:center">'+
+    '<div id="noStat" style="text-align:center;margin:8px 0;min-height:24px"></div>'+
+    '<button class="good xl" id="okNo" disabled>✓ ยืนยันเบอร์นี้</button><div style="height:10px"></div>'+
+    '<div class="row"><button id="back">📷 กลับไปถ่าย</button><button class="danger" id="cancel">ยกเลิกตู้นี้</button></div></div>';
+  var inp=$('noIn');
+  function upd(){ var n=cleanNo(inp.value); if(inp.value!==n) inp.value=n; var v=n.length===11&&validNo(n);
+    $('boxes').innerHTML=Array.apply(null,Array(11)).map(function(_,i){ var c=n.charAt(i); var cls=i===n.length?'on':''; if(n.length===11) cls=v?'ok':'bad'; var bad=(i<4&&c&&!/[A-Z]/.test(c))||(i>=4&&c&&!/\d/.test(c)); return '<span class="'+(bad?'bad':cls)+'">'+h(c||'')+'</span>'; }).join('');
+    $('noStat').innerHTML=n.length<11?'<span class="muted">'+n.length+'/11</span>':(v?'<span class="tag g">check digit ผ่าน</span>':'<span class="tag r">check digit ไม่ผ่าน — ตรวจเบอร์อีกครั้ง</span>');
+    $('okNo').disabled=!v; }
+  inp.oninput=upd; upd(); setTimeout(function(){ inp.focus(); },50);
+  $('okNo').onclick=function(){ var n=cleanNo(inp.value); if(!validNo(n)) return; acceptNumber(n,'manual'); };
+  $('back').onclick=function(){ ss.step=(ss.read?'confirmNo':'num'); render(); };
+  $('cancel').onclick=cancelSession;
+}
+// รับเบอร์แล้ว → เตรียมโฟลเดอร์ (ถ้าออนไลน์) → เก็บรูปเบอร์เป็นรูปแรก → หน้าเก็บรูป
+async function acceptNumber(no, engine){
+  var ss=S.session; if(!ss) return;
+  ss.no=no; ss.source=engine==='manual'?'manual':(engine==='ai'?'ai':'ocr');
+  ss.reader.engine=ss.source; ss.reader.byName=S.name;
+  if(ss.numFrame){ // เก็บรูปเบอร์ตู้เป็นหลักฐานรูปแรก
+    var out=await processPhoto(ss.numFrame,[no,S.name+'  '+nowTxt()]);
+    ss.numberPhoto={k:++ss.k,blob:out.blob,thumb:out.thumb,name:no+'_'+stamp()+'_00_number.jpg',kind:'number'};
+    ss.photos.push(ss.numberPhoto);
+    ss.numFrame=null;
+  }
+  ss.step='collect'; render();
+  try{ var r=await gs('beginContainer',{no:no}); ss.folderId=r.folderId; folderCache[ss.sid]=r.folderId; }catch(e){ /* ออฟไลน์: คิวจะสร้างโฟลเดอร์ให้เองตอนส่ง */ }
+}
+// 4) เก็บรูปงาน
+function screenCollect(app,ss){
+  app.innerHTML='<div class="card" style="padding:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span class="pill" style="font-size:16px">'+h(ss.no)+'</span>'+(ss.source==='manual'?'<span class="tag y">คีย์เอง</span>':ss.source==='ai'?'<span class="tag n">AI</span>':'<span class="tag g">OCR</span>')+'<span class="muted">ถ่ายรูปงานต่อเนื่อง แล้วกดส่ง</span></div>'+
+    camBlock(ss.no,false)+'<div class="strip" id="strip">'+stripHtml(ss)+'</div>'+
+    '<div class="row"><button class="danger" id="cancel">ยกเลิกตู้นี้</button><button class="accent" id="done" style="flex:2">ส่งข้อมูล ▸ <span id="doneN">('+workPhotos(ss).length+' รูป)</span></button></div>';
+  mountCam(shootWork, cntTxt(ss));
+  $('cancel').onclick=cancelSession;
+  $('done').onclick=function(){ if(!workPhotos(ss).length){ toast('ยังไม่ได้ถ่ายรูปงาน'); return; } ss.step='send'; stopCam(); render(); };
+  bindStrip(ss);
+}
+function workPhotos(ss){ return ss.photos.filter(function(p){ return p.kind!=='number'; }); }
+function cntTxt(ss){ return workPhotos(ss).length+' รูป'; }
+function stripHtml(ss){ var ps=ss.photos.slice().reverse(); return ps.length?ps.map(function(p){ return '<div class="th" data-k="'+p.k+'"><img src="'+p.thumb+'">'+(p.kind==='number'?'<div class="b">เบอร์ตู้</div>':'<span class="x" data-x="'+p.k+'">✕</span>')+'</div>'; }).join(''):'<div class="muted" style="padding:20px 6px">ยังไม่มีรูป</div>'; }
+function bindStrip(ss){ var st=$('strip'); if(!st) return; st.onclick=async function(e){ var k=e.target.getAttribute('data-x'); if(k==null) return; if(!await ask('ลบรูปนี้?')) return; ss.photos=ss.photos.filter(function(p){ return String(p.k)!==k; }); softRefresh(ss); }; }
+function softRefresh(ss){ var st=$('strip'); if(st) st.innerHTML=stripHtml(ss); if($('cnt')) $('cnt').textContent=cntTxt(ss); if($('doneN')) $('doneN').textContent='('+workPhotos(ss).length+' รูป)'; }
+async function shootWork(){
+  var ss=S.session; if(!ss) return;
+  var frame; try{ frame=await captureCanvas(); }catch(e){ toast('ถ่ายไม่สำเร็จ: '+(e.message||e)); return; }
+  if(!frame) return;
+  var out=await processPhoto(frame,[ss.no,S.name+'  '+nowTxt()]);
+  var n=workPhotos(ss).length+1;
+  ss.photos.push({k:++ss.k,blob:out.blob,thumb:out.thumb,name:ss.no+'_'+stamp()+'_'+p2(n)+'.jpg',kind:'photo'});
+  softRefresh(ss);
+}
+// 5) ยืนยันส่ง
+function screenSend(app,ss){
+  var wp=workPhotos(ss);
+  app.innerHTML='<div class="card"><div class="big">'+h(ss.no)+'</div><div style="text-align:center" class="muted">รูปงาน '+wp.length+' รูป'+(ss.numberPhoto?' + รูปเบอร์ตู้ 1':'')+' · ถ่ายโดย '+h(S.name)+(ss.source==='manual'?' · <span class="tag y">คีย์เอง</span>':'')+'</div></div>'+
+    '<div class="card"><div class="grid" id="grid">'+ss.photos.map(function(p){ return '<div style="position:relative"><img src="'+p.thumb+'">'+(p.kind==='number'?'<span class="tag n" style="position:absolute;left:4px;top:4px">เบอร์</span>':'<button class="ghost" data-rm="'+p.k+'" style="position:absolute;right:0;top:0;color:#fff;background:rgba(0,0,0,.5);padding:2px 8px">✕</button>')+'</div>'; }).join('')+'</div></div>'+
+    '<button class="good xl" id="send">✓ ยืนยันส่ง</button><div style="height:10px"></div><div class="row"><button id="more">📷 ถ่ายเพิ่ม</button><button class="danger" id="cancel">ยกเลิกตู้นี้</button></div>';
+  $('more').onclick=function(){ ss.step='collect'; render(); };
+  $('cancel').onclick=cancelSession;
+  $('grid').onclick=async function(e){ var k=e.target.getAttribute('data-rm'); if(k==null) return; if(!await ask('ลบรูปนี้?')) return; ss.photos=ss.photos.filter(function(p){ return String(p.k)!==k; }); if(!workPhotos(ss).length){ ss.step='collect'; } render(); };
+  $('send').onclick=async function(){
+    $('send').disabled=true;
+    try{ await enqueueSession(ss); }catch(e){ toast('เก็บเข้าคิวไม่ได้: '+(e.message||e),4000); $('send').disabled=false; return; }
+    toast('ส่งตู้ '+ss.no+' เข้าคิวแล้ว — ถ่ายตู้ถัดไปได้เลย',2600);
+    S.session=null; startSession();
+  };
+}
+async function cancelSession(){
+  var ss=S.session; if(!ss) return;
+  var n=workPhotos(ss).length;
+  if(n && !await ask('ทิ้ง '+n+' รูปของตู้ '+(ss.no||'')+' ที่ยังไม่ส่ง ใช่ไหม?')) return;
+  S.session=null; stopCam(); render();
+}
+
+/* ================================================================== admin ================================================================== */
+function renderAdmin(app){
+  if(!S.tok){ return adminLoginScreen(app); }
+  var tabs=[['today','วันนี้ / ทะเบียน'],['search','ค้นหารูป'],['stats','สถิติการอ่าน'],['staff','พนักงาน'],['settings','ตั้งค่า']];
+  app.innerHTML='<div class="card" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><b>หน้าผู้ดูแล</b><span class="muted">ลิงก์เดียวกับมือถือ</span><span style="flex:1"></span><button id="toMobile">ไปหน้าถ่ายรูป</button><button class="ghost" id="logout">ออกจากระบบ</button></div>'+
+    '<div class="tabs">'+tabs.map(function(t){ return '<button data-t="'+t[0]+'" class="'+(S.adminTab===t[0]?'on':'')+'">'+t[1]+'</button>'; }).join('')+'</div><div id="adminBody"></div>';
+  app.querySelectorAll('[data-t]').forEach(function(b){ b.onclick=function(){ S.adminTab=b.getAttribute('data-t'); renderAdmin(app); }; });
+  $('toMobile').onclick=function(){ S.admin=false; ls('ye_forceMobile','1'); render(); if((S.boot&&S.boot.reader)!=='gemini') ocrInit(); };
+  $('logout').onclick=function(){ ls('ye_tok',null); S.tok=''; render(); };
+  var body=$('adminBody');
+  ({today:adminToday,search:adminSearch,stats:adminStats,staff:adminStaff,settings:adminSettings}[S.adminTab]||adminToday)(body);
+}
+async function adminLoginScreen(app){
+  app.innerHTML='<div class="card" style="max-width:420px;margin:20px auto"><h2>หน้าผู้ดูแล</h2><div id="pinBox">กำลังตรวจสอบ…</div><div style="text-align:center;margin-top:10px"><button class="ghost" id="toMobile">ไปหน้าถ่ายรูป</button></div></div>';
+  $('toMobile').onclick=function(){ S.admin=false; ls('ye_forceMobile','1'); render(); if((S.boot&&S.boot.reader)!=='gemini') ocrInit(); };
+  var has=true; try{ has=(await gs('hasPin')).hasPin; }catch(e){ $('pinBox').innerHTML='⚠ '+h(e.message||e); return; }
+  $('pinBox').innerHTML=(has?'<label class="f">PIN ผู้ดูแล</label>':'<div class="card warn"><b>ยังไม่มี PIN</b><div class="muted">ตั้ง PIN ตัวเลข 4–8 หลักสำหรับหน้าผู้ดูแล (ตั้งได้ครั้งเดียว เปลี่ยนภายหลังได้ที่ตั้งค่า)</div></div><label class="f">ตั้ง PIN ใหม่</label>')+
+    '<input id="pin" type="password" inputmode="numeric" maxlength="8" class="mono" style="text-align:center;font-size:24px"><div style="height:10px"></div><button class="primary big" id="go">'+(has?'เข้าสู่ระบบ':'ตั้ง PIN และเข้าสู่ระบบ')+'</button><div id="pinErr" class="muted" style="color:var(--bad);margin-top:8px"></div>';
+  $('pin').onkeydown=function(e){ if(e.key==='Enter') $('go').click(); }; $('pin').focus();
+  $('go').onclick=async function(){ var p=$('pin').value.trim(); if(!/^\d{4,8}$/.test(p)){ $('pinErr').textContent='PIN ต้องเป็นตัวเลข 4–8 หลัก'; return; } $('go').disabled=true; try{ var r=await gs(has?'adminLogin':'setupPin',p); S.tok=r.token; ls('ye_tok',r.token); render(); }catch(e){ $('pinErr').textContent=String(e.message||e); $('go').disabled=false; } };
+}
+function dateInputs(id,days,label){ var to=todayIso(); var f=new Date(Date.now()-(days-1)*86400000); var from=f.getFullYear()+'-'+p2(f.getMonth()+1)+'-'+p2(f.getDate());
+  return '<div class="row" style="align-items:flex-end;flex-wrap:wrap"><div style="flex:0 0 160px"><label class="f">ตั้งแต่</label><input type="date" id="'+id+'From" value="'+from+'"></div><div style="flex:0 0 160px"><label class="f">ถึง</label><input type="date" id="'+id+'To" value="'+to+'"></div><div style="flex:0 0 auto"><button id="'+id+'Go" class="primary">'+h(label||'แสดง')+'</button></div></div>'; }
+function rng(id){ var f=$(id+'From').value, t=$(id+'To').value; if(f>t){ var x=f; f=t; t=x; } return [f,t]; }
+function entryRows(list){ return '<table><tr><th>วันที่</th><th>เบอร์ตู้</th><th>รูป</th><th>รอบ</th><th>เวลาแรก–ล่าสุด</th><th>คนถ่าย</th><th>ที่มาเบอร์</th><th>ลูกค้า</th><th></th></tr>'+list.map(function(e){ return '<tr><td>'+h(e.date)+'</td><td class="no">'+h(e.no)+'</td><td>'+e.photos+'</td><td>'+(e.rounds||1)+'</td><td>'+h((e.time||'').substring(11,16))+'–'+h((e.lastTime||'').substring(11,16))+'</td><td>'+h(e.by)+'</td><td>'+(e.manual?'<span class="tag y">คีย์เอง</span>':e.ai?'<span class="tag n">AI</span>':'<span class="tag g">OCR</span>')+'</td><td>'+({ok:'<span class="tag g">ส่งแล้ว</span>',error:'<span class="tag r">ผิดพลาด</span>',off:'<span class="tag k">ปิด</span>'}[e.customer]||'<span class="tag k">-</span>')+'</td><td><a href="#" data-f="'+h(e.folderId)+'">ดูรูป</a> · <a href="'+h(e.folderUrl)+'" target="_blank">Drive</a></td></tr>'; }).join('')+'</table>'; }
+function bindPhotoLinks(root){ root.querySelectorAll('[data-f]').forEach(function(a){ a.onclick=function(ev){ ev.preventDefault(); showPhotos(a.getAttribute('data-f')); }; }); }
+function csvDownload(name, rows){ var csv='﻿'+rows.map(function(l){ return l.map(function(v){ return '"'+String(v==null?'':v).replace(/"/g,'""')+'"'; }).join(','); }).join('\r\n'); var a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv); a.download=name; document.body.appendChild(a); a.click(); a.remove(); }
+async function adminToday(body){
+  body.innerHTML='<div class="card"><h2>ทะเบียนตู้ที่ถ่าย</h2>'+dateInputs('r',1)+'<div id="rRes" style="margin-top:12px">กำลังโหลด…</div></div><div id="photoBox"></div>';
+  async function load(){ var r=rng('r'); $('rRes').innerHTML='กำลังโหลด…'; try{ var d=await gs('getRegistry',r[0],r[1]); var list=d.entries;
+      $('rRes').innerHTML='<div class="row" style="margin-bottom:8px"><span class="muted">'+list.length+' ตู้ · '+list.reduce(function(a,e){ return a+(e.photos||0); },0)+' รูป</span><button id="csv" style="flex:0 0 auto">ดาวน์โหลด CSV</button></div><div style="max-height:60vh;overflow:auto">'+(list.length?entryRows(list):'<div class="muted">ไม่มีข้อมูล</div>')+'</div>';
+      $('csv').onclick=function(){ csvDownload('yardeye_'+r[0]+(r[1]!==r[0]?'_'+r[1]:'')+'.csv',[['วันที่','เบอร์ตู้','รูป','รอบ','เวลาแรก','เวลาล่าสุด','คนถ่าย','ที่มาเบอร์','ส่งลูกค้า','โฟลเดอร์']].concat(list.map(function(e){ return [e.date,e.no,e.photos,e.rounds||1,e.time,e.lastTime,e.by,e.manual?'คีย์เอง':e.ai?'AI':'OCR',e.customer,e.folderUrl]; }))); };
+      bindPhotoLinks($('rRes'));
+    }catch(e){ $('rRes').innerHTML='⚠ '+h(e.message||e); } }
+  $('rGo').onclick=load; load();
+}
+function adminSearch(body){
+  body.innerHTML='<div class="card"><div class="row"><input id="q" class="mono" placeholder="พิมพ์เบอร์ตู้ (บางส่วนก็ได้ อย่างน้อย 3 ตัว)"><button class="primary" id="qb" style="flex:0 0 auto">ค้นหา</button></div><div id="qres" style="margin-top:12px"></div></div><div id="photoBox"></div>';
+  $('qb').onclick=async function(){ var q=$('q').value.trim(); if(q.length<3){ toast('พิมพ์อย่างน้อย 3 ตัว'); return; } $('qres').innerHTML='กำลังค้นหา…'; try{ var r=await gs('searchContainer',q); $('qres').innerHTML=r.hits.length?'<div class="muted">'+r.hits.length+' รายการ</div>'+entryRows(r.hits):'<div class="muted">ไม่พบ</div>'; bindPhotoLinks($('qres')); }catch(e){ $('qres').innerHTML='⚠ '+h(e.message||e); } };
+  $('q').onkeydown=function(e){ if(e.key==='Enter') $('qb').click(); }; $('q').focus();
+}
+async function showPhotos(folderId){
+  var box=$('photoBox')||$('adminBody'); var div=document.createElement('div'); div.className='card'; div.innerHTML='<h2>รูปในโฟลเดอร์</h2><div class="muted">กำลังโหลด…</div>'; box.prepend(div); div.scrollIntoView({behavior:'smooth'});
+  try{ var r=await gs('listPhotos',folderId);
+    div.innerHTML='<div class="row"><h2 style="flex:1">รูปในโฟลเดอร์ ('+r.photos.length+')</h2><a href="'+h(r.folderUrl)+'" target="_blank" style="flex:0 0 auto">เปิดใน Drive</a><button class="ghost" style="flex:0 0 auto" id="closeP">ปิด</button></div><div class="grid">'+r.photos.map(function(p){ return '<div><img src="'+(p.thumb||'')+'" data-id="'+h(p.id)+'" title="'+h(p.name)+'" style="cursor:zoom-in"><div class="muted" style="font-size:11px;word-break:break-all">'+h(p.name)+'</div></div>'; }).join('')+'</div>';
+    $('closeP').onclick=function(){ div.remove(); };
+    div.querySelectorAll('img[data-id]').forEach(function(im){ im.onclick=async function(){ var m=document.createElement('div'); m.className='modal'; m.innerHTML='<div class="box" style="max-width:96vw;text-align:center">กำลังโหลดรูปเต็ม…</div>'; document.body.appendChild(m); m.onclick=function(){ m.remove(); }; try{ var f=await gs('getPhotoFull',im.getAttribute('data-id')); m.firstChild.innerHTML='<img src="'+f.data+'" style="max-width:100%;max-height:85vh;border-radius:8px"><div class="muted">'+h(f.name)+'</div>'; }catch(e){ m.firstChild.textContent='โหลดไม่ได้'; } }; });
+  }catch(e){ div.innerHTML='⚠ '+h(e.message||e); }
+}
+async function adminStats(body){
+  body.innerHTML='<div class="card"><h2>สถิติการอ่านเบอร์ตู้</h2><div class="muted">ใช้ตัดสินว่า OCR ฟรีพอไหม หรือควรเปิด AI — ดูจากสัดส่วนที่อ่านผ่านครั้งแรก / ต้องถ่ายใหม่ / ต้องคีย์เอง</div>'+dateInputs('s',7)+'<div id="sRes" style="margin-top:12px"></div></div>';
+  async function load(){ var r=rng('s'); $('sRes').innerHTML='กำลังคำนวณ…'; try{ var s=await gs('getStats',r[0],r[1]); var n=s.sessions||0; function pc(x){ return n?Math.round(x*100/n)+'%':'-'; }
+      $('sRes').innerHTML='<div class="stat"><div><b>'+s.containers+'</b>ตู้</div><div><b>'+s.photos+'</b>รูป</div><div><b>'+n+'</b>รอบถ่าย</div><div><b>'+pc(s.engine.ocr||0)+'</b>OCR อ่านได้ ('+(s.engine.ocr||0)+')</div><div><b>'+pc(s.engine.ai||0)+'</b>AI ช่วยอ่าน ('+(s.engine.ai||0)+')</div><div><b>'+pc(s.engine.manual||0)+'</b>คีย์เอง ('+(s.engine.manual||0)+')</div><div><b>'+pc(s.firstTryOk)+'</b>ผ่านตั้งแต่ครั้งแรก</div><div><b>'+s.retakes+'</b>ถ่ายใหม่ (ครั้ง)</div><div><b>'+(s.ocrMsN?(s.ocrMsTotal/s.ocrMsN/1000).toFixed(1)+' วิ':'-')+'</b>เวลา OCR เฉลี่ย</div><div><b>'+s.aiTried+'</b>เรียก AI (สำเร็จ '+s.aiOk+')</div></div>'+
+        '<h2 style="margin-top:14px">รายคน</h2><table><tr><th>คนถ่าย</th><th>รอบ</th><th>รูป</th><th>คีย์เอง</th><th>AI</th></tr>'+Object.keys(s.byStaff).map(function(k){ var b=s.byStaff[k]; return '<tr><td>'+h(k)+'</td><td>'+b.sessions+'</td><td>'+b.photos+'</td><td>'+b.manual+'</td><td>'+b.ai+'</td></tr>'; }).join('')+'</table>'+
+        '<h2 style="margin-top:14px">รายวัน</h2><table><tr><th>วันที่</th><th>ตู้</th><th>รูป</th></tr>'+Object.keys(s.byDay).sort().map(function(d){ return '<tr><td>'+d+'</td><td>'+s.byDay[d].containers+'</td><td>'+s.byDay[d].photos+'</td></tr>'; }).join('')+'</table>';
+    }catch(e){ $('sRes').innerHTML='⚠ '+h(e.message||e); } }
+  $('sGo').onclick=load; load();
+}
+async function adminStaff(body){
+  body.innerHTML='<div class="card">กำลังโหลด…</div>';
+  var s; try{ s=await gs('getSettings'); }catch(e){ body.innerHTML='⚠ '+h(e.message||e); return; }
+  body.innerHTML='<div class="card"><h2>รายชื่อพนักงานที่ถ่ายรูป</h2><div class="muted">บรรทัดละชื่อ ไม่เกิน 8 ตัวอักษร — มือถือจะเลือกจากรายการนี้ และชื่อจะพิมพ์เป็นลายน้ำบนรูป</div><textarea id="ta" rows="14">'+h((s.staff||[]).join('\n'))+'</textarea><div style="height:10px"></div><button class="primary" id="save">บันทึก</button></div>';
+  $('save').onclick=async function(){ var arr=$('ta').value.split('\n').map(function(x){ return x.trim().substring(0,8); }).filter(Boolean); try{ await gs('saveSettings',{staff:arr}); toast('บันทึกแล้ว ('+arr.length+' คน)'); S.boot.staff=arr; }catch(e){ toast('บันทึกไม่ได้: '+(e.message||e),4000); } };
+}
+async function adminSettings(body){
+  body.innerHTML='<div class="card">กำลังโหลด…</div>';
+  var s; try{ s=await gs('getSettings'); }catch(e){ body.innerHTML='⚠ '+h(e.message||e); return; }
+  var c=s.customer||{};
+  body.innerHTML=
+    '<div class="card"><h2>ตัวอ่านเบอร์ตู้</h2><div class="radio">'+
+      '<label><input type="radio" name="rd" value="hybrid"'+(s.reader==='hybrid'?' checked':'')+'><div><b>แบบผสม (แนะนำ)</b><div class="muted">OCR บนเครื่องอ่านก่อน (ฟรี) ถ้า check digit ไม่ผ่านค่อยส่งรูปให้ AI (Gemini) — เสียเงินเฉพาะรูปที่ OCR อ่านไม่ออก</div></div></label>'+
+      '<label><input type="radio" name="rd" value="local"'+(s.reader==='local'?' checked':'')+'><div><b>OCR บนเครื่องอย่างเดียว</b><div class="muted">ฟรีทั้งหมด ไม่ใช้เน็ตตอนอ่าน อ่านไม่ผ่าน = ถ่ายใหม่หรือคีย์เอง</div></div></label>'+
+      '<label><input type="radio" name="rd" value="gemini"'+(s.reader==='gemini'?' checked':'')+'><div><b>AI (Gemini) อย่างเดียว</b><div class="muted">แม่นที่สุด ทุกรูปเสียเงิน (~0.05–0.07 บาท/รูป) ต้องมี key และ billing</div></div></label></div>'+
+      '<label class="f">Gemini API key '+(s.hasKey?'<span class="tag g">ตั้งแล้ว '+h(s.geminiKeyMasked)+'</span>':'<span class="tag r">ยังไม่ตั้ง</span>')+'</label><input id="key" placeholder="วาง key ใหม่ที่นี่ (เว้นว่างถ้าไม่เปลี่ยน)" autocomplete="off">'+
+      '<label class="f">โมเดล</label><input id="model" value="'+h(s.model)+'"></div>'+
+    '<div class="card"><h2>รูปและลายน้ำ</h2><div class="row"><div><label class="f">ตำแหน่งลายน้ำ</label><select id="wm">'+[['bl','ล่างซ้าย'],['br','ล่างขวา'],['tl','บนซ้าย'],['tr','บนขวา']].map(function(o){ return '<option value="'+o[0]+'"'+(s.wmPos===o[0]?' selected':'')+'>'+o[1]+'</option>'; }).join('')+'</select></div>'+
+      '<div><label class="f">ด้านยาวของรูป (px)</label><input id="maxPx" type="number" value="'+s.maxPx+'"></div><div><label class="f">คุณภาพ JPEG</label><input id="jpegQ" type="number" step="0.01" min="0.5" max="0.95" value="'+s.jpegQ+'"></div></div>'+
+      '<div class="row"><div><label class="f">ชื่อสาขา/ลาน (แสดงบนหัวแอป)</label><input id="branch" value="'+h(s.branch)+'"></div><div><label class="f">เก็บรูปกี่วัน (0 = เก็บตลอด)</label><input id="ret" type="number" value="'+s.retentionDays+'"></div></div>'+
+      '<div class="hint">การลบอัตโนมัติทำงานตอนตี 2 ทุกวัน เมื่อกด "เปิดการลบอัตโนมัติ" '+(s.triggers&&s.triggers.indexOf('runRetention')>=0?'<span class="tag g">เปิดอยู่</span>':'<span class="tag k">ยังไม่เปิด</span>')+' <button class="ghost" id="trig" style="padding:4px 8px">เปิดการลบอัตโนมัติ</button></div></div>'+
+    '<div class="card"><h2>ส่งต่อรูปให้ลูกค้า</h2><div class="muted">คัดลอกรูปของทุกตู้ที่ส่ง ไปยังโฟลเดอร์ Google Drive ที่ลูกค้าแชร์ให้บัญชีนี้ (ต้องแชร์แบบ "แก้ไขได้")</div>'+
+      '<label class="f"><input type="checkbox" id="cEn"'+(c.enabled?' checked':'')+' style="width:auto"> เปิดใช้งาน</label>'+
+      '<label class="f">โฟลเดอร์ปลายทาง (วางลิงก์หรือ ID)</label><div class="row"><input id="cFolder" value="'+h(c.folderId||'')+'" placeholder="https://drive.google.com/drive/folders/…"><button id="cTest" style="flex:0 0 auto">ทดสอบ</button></div><div id="cTestRes" class="hint"></div>'+
+      '<div class="row"><div><label class="f">ชื่อลูกค้า (แสดงในรายงาน)</label><input id="cName" value="'+h(c.name||'')+'"></div><div><label class="f">โครงสร้างโฟลเดอร์ปลายทาง</label><select id="cPat">'+[['date/no','วันที่ / เบอร์ตู้'],['no/date','เบอร์ตู้ / วันที่'],['ym/dd/no','ปี-เดือน / วัน / เบอร์ตู้'],['no','เบอร์ตู้ (รวมทุกวัน)']].map(function(o){ return '<option value="'+o[0]+'"'+((c.pattern||'date/no')===o[0]?' selected':'')+'>'+o[1]+'</option>'; }).join('')+'</select></div></div>'+
+      '<h2 style="margin-top:14px;font-size:16px">ส่งย้อนหลัง</h2>'+dateInputs('c',7,'ส่งย้อนหลัง')+'<label class="f"><input type="checkbox" id="cForce" style="width:auto"> ส่งซ้ำแม้เคยส่งแล้ว</label><div id="cRes" class="hint"></div></div>'+
+    '<div class="card"><h2>PIN ผู้ดูแล</h2><div class="row"><div><label class="f">PIN เดิม</label><input id="pOld" type="password" inputmode="numeric" maxlength="8"></div><div><label class="f">PIN ใหม่ (4–8 หลัก)</label><input id="pNew" type="password" inputmode="numeric" maxlength="8"></div><div style="flex:0 0 auto"><label class="f">&nbsp;</label><button id="pGo">เปลี่ยน PIN</button></div></div></div>'+
+    '<button class="primary big" id="save">บันทึกการตั้งค่า</button><div class="hint" style="text-align:center">เวอร์ชันหน้าจอ v'+APP_VER+' · หลังบ้าน v'+h(s.version)+' · <a href="'+h(s.rootUrl)+'" target="_blank">โฟลเดอร์ข้อมูลใน Drive</a></div>';
+  $('save').onclick=async function(){ $('save').disabled=true; try{ var patch={reader:document.querySelector('input[name=rd]:checked').value,model:$('model').value.trim(),wmPos:$('wm').value,maxPx:+$('maxPx').value||1600,jpegQ:+$('jpegQ').value||0.82,branch:$('branch').value.trim()||'NOVA',retentionDays:+$('ret').value||0,customer:{enabled:$('cEn').checked,folderId:$('cFolder').value.trim(),pattern:$('cPat').value,name:$('cName').value.trim()}}; if($('key').value.trim()) patch.geminiKey=$('key').value.trim(); await gs('saveSettings',patch); toast('บันทึกแล้ว'); try{ S.boot=await gs('getBootstrap'); }catch(e){} adminSettings(body); }catch(e){ toast('บันทึกไม่ได้: '+(e.message||e),4000); $('save').disabled=false; } };
+  $('cTest').onclick=async function(){ $('cTestRes').textContent='กำลังทดสอบ…'; try{ var r=await gs('testCustomerFolder',$('cFolder').value.trim()); $('cTestRes').innerHTML=r.ok?'<span class="tag g">เปิดได้</span> '+h(r.name)+(r.owner?' · เจ้าของ '+h(r.owner):'')+' · '+(r.canWrite?'<span class="tag g">เขียนได้</span>':'<span class="tag r">เขียนไม่ได้ — ขอสิทธิ์แก้ไข</span>'):'<span class="tag r">'+h(r.error)+'</span>'; }catch(e){ $('cTestRes').textContent='⚠ '+(e.message||e); } };
+  $('cGo').onclick=async function(){ var r=rng('c'); $('cRes').textContent='กำลังส่ง… (อาจใช้เวลาหลายนาที)'; try{ var st=await gs('copyRange',r[0],r[1],$('cForce').checked); $('cRes').textContent='ตู้ '+st.entries+' · คัดลอก '+st.copied+' รูป · ข้าม '+st.skipped+' (มีอยู่แล้ว) · ผิดพลาด '+st.errors+(st.stopped?' · หยุดก่อนครบเพราะเกินเวลา กดอีกครั้งเพื่อทำต่อ':''); }catch(e){ $('cRes').textContent='⚠ '+(e.message||e); } };
+  $('trig').onclick=async function(){ try{ await gs('installTriggers'); toast('เปิดการลบอัตโนมัติแล้ว'); adminSettings(body); }catch(e){ toast('⚠ '+(e.message||e),4000); } };
+  $('pGo').onclick=async function(){ try{ await gs('changePin',$('pOld').value,$('pNew').value); toast('เปลี่ยน PIN แล้ว'); $('pOld').value=$('pNew').value=''; }catch(e){ toast('⚠ '+(e.message||e),4000); } };
+}
+
+boot();
+</script>
+</body>
+</html>
